@@ -1,4 +1,4 @@
-import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock } from 'lucide-react';
+import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2 } from 'lucide-react';
 import { ContentPiece } from '../lib/supabase';
 
 interface ContentDetailProps {
@@ -58,6 +58,12 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
               <h2 className="text-xl font-bold text-gray-800">{config.name}</h2>
               <p className="text-sm text-gray-600 capitalize">{formatNames[piece.format]}</p>
             </div>
+            {piece.published && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full border border-green-300">
+                <CheckCircle2 className="w-3 h-3" />
+                Publicado
+              </span>
+            )}
           </div>
           <button
             onClick={onClose}
