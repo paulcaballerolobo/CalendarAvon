@@ -234,7 +234,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
             </div>
           </div>
 
-          {/* Toggle Publicado */}
+          {/* Toggle Armado */}
           <div
             onClick={() => setPublished(!published)}
             className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all select-none ${
@@ -250,10 +250,10 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
             </div>
             <div>
               <p className={`font-semibold text-sm ${published ? 'text-green-700' : 'text-gray-600'}`}>
-                {published ? '✓ Publicado' : 'Marcar como publicado'}
+                {published ? '✓ Armado' : 'Marcar como armado'}
               </p>
               <p className="text-xs text-gray-500">
-                {published ? 'Esta pieza ya fue publicada' : 'Todavía no fue publicada'}
+                {published ? 'Esta pieza ya fue armada' : 'Todavía no fue armada'}
               </p>
             </div>
           </div>
