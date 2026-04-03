@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Upload, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, Upload, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase, ContentPiece } from '../lib/supabase';
 
 interface ContentFormProps {
@@ -14,6 +14,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
   const [date, setDate] = useState<string>(piece?.date || '');
   const [time, setTime] = useState<string>(piece?.time || '');
   const [description, setDescription] = useState<string>(piece?.description || '');
+  const [published, setPublished] = useState<boolean>(piece?.published || false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(piece?.image_url || null);
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
         time,
         description,
         image_url: imageUrl,
+        published,
       };
 
       if (piece) {
@@ -229,6 +231,30 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
                   />
                 </label>
               )}
+            </div>
+          </div>
+
+          {/* Toggle Publicado */}
+          <div
+            onClick={() => setPublished(!published)}
+            className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all select-none ${
+              published
+                ? 'border-green-400 bg-green-50'
+                : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+            }`}
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+              published ? 'bg-green-500' : 'bg-gray-300'
+            }`}>
+              <CheckCircle2 className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <p className={`font-semibold text-sm ${published ? 'text-green-700' : 'text-gray-600'}`}>
+                {published ? '✓ Publicado' : 'Marcar como publicado'}
+              </p>
+              <p className="text-xs text-gray-500">
+                {published ? 'Esta pieza ya fue publicada' : 'Todavía no fue publicada'}
+              </p>
             </div>
           </div>
 
