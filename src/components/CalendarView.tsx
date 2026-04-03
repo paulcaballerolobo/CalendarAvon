@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Instagram, MessageCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Instagram, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { ContentPiece } from '../lib/supabase';
 import { ContentDetail } from './ContentDetail';
 
@@ -38,13 +38,8 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
   const daysInMonth = lastDayOfMonth.getDate();
   const startingDayOfWeek = firstDayOfMonth.getDay();
 
-  const previousMonth = () => {
-    setCurrentDate(new Date(year, month - 1, 1));
-  };
-
-  const nextMonth = () => {
-    setCurrentDate(new Date(year, month + 1, 1));
-  };
+  const previousMonth = () => setCurrentDate(new Date(year, month - 1, 1));
+  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -80,11 +75,18 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
               <button
                 key={piece.id}
                 onClick={() => setSelectedPiece(piece)}
-                className={`w-full text-left px-2 py-1 rounded text-xs font-medium border ${networkColors[piece.network]} hover:shadow-md transition-shadow`}
+                className={`w-full text-left px-2 py-1 rounded text-xs font-medium border transition-shadow hover:shadow-md ${
+                  piece.published
+                    ? 'bg-green-100 text-green-800 border-green-400'
+                    : networkColors[piece.network]
+                }`}
               >
                 <div className="flex items-center gap-1">
-                  <Icon className="w-3 h-3" />
+                  <Icon className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate capitalize">{piece.format}</span>
+                  {piece.published && (
+                    <CheckCircle2 className="w-3 h-3 ml-auto flex-shrink-0 text-green-600" />
+                  )}
                 </div>
                 <div className="text-xs opacity-75">{piece.time.slice(0, 5)}</div>
               </button>
