@@ -16,6 +16,8 @@ export interface ContentPiece {
   date: string;
   time: string;
   description: string;
+  reference: string | null;
   image_url: string | null;
+  published: boolean;
   created_at: string;
 }
