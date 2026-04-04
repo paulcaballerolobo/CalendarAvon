@@ -1,8 +1,116 @@
 import { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, List } from 'lucide-react';
+import { Calendar as CalendarIcon, List, LayoutGrid, TrendingUp, Instagram, MessageCircle } from 'lucide-react';
 import { CalendarView } from '../components/CalendarView';
 import { ListView } from '../components/ListView';
 import { supabase, ContentPiece } from '../lib/supabase';
+
+const formatNames: Record<string, string> = {
+  reel: 'Reel',
+  carrusel: 'Carrusel',
+  historia: 'Historia',
+  post: 'Post estático',
+  newsletter: 'Newsletter',
+};
+
+const networkNames: Record<string, string> = {
+  instagram: 'Instagram',
+  whatsapp: 'WhatsApp',
+  tiktok: 'TikTok',
+};
+
+const networkColors: Record<string, string> = {
+  instagram: 'bg-pink-100 text-pink-700',
+  whatsapp: 'bg-green-100 text-green-700',
+  tiktok: 'bg-gray-100 text-gray-800',
+};
+
+function StatsPanel({ pieces }: { pieces: ContentPiece[] }) {
+  const total = pieces.length;
+  const goodPerformances = pieces.filter(p => p.good_performance).length;
+
+  const byFormat = Object.entries(
+    pieces.reduce((acc, p) => {
+      acc[p.format] = (acc[p.format] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  ).sort((a, b) => b[1] - a[1]);
+
+  const byNetwork = Object.entries(
+    pieces.reduce((acc, p) => {
+      acc[p.network] = (acc[p.network] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)
+  ).sort((a, b) => b[1] - a[1]);
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+
+      {/* Total piezas */}
+      <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-1">
+        <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold uppercase tracking-wide mb-1">
+          <LayoutGrid className="w-4 h-4" />
+          Total piezas
+        </div>
+        <p className="text-4xl font-bold text-gray-800">{total}</p>
+      </div>
+
+      {/* Buenas performances */}
+      <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-1">
+        <div className="flex items-center gap-2 text-amber-500 text-xs font-semibold uppercase tracking-wide mb-1">
+          <TrendingUp className="w-4 h-4" />
+          Buena performance
+        </div>
+        <p className="text-4xl font-bold text-amber-600">{goodPerformances}</p>
+        {total > 0 && (
+          <p className="text-xs text-gray-400">{Math.round((goodPerformances / total) * 100)}% del total</p>
+        )}
+      </div>
+
+      {/* Por formato */}
+      <div className="bg-white rounded-xl shadow p-5">
+        <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">
+          <LayoutGrid className="w-4 h-4" />
+          Por formato
+        </div>
+        <div className="space-y-1.5">
+          {byFormat.map(([format, count]) => (
+            <div key={format} className="flex items-center justify-between">
+              <span className="text-xs text-gray-600 capitalize">{formatNames[format] || format}</span>
+              <div className="flex items-center gap-2">
+                <div className="w-16 bg-gray-100 rounded-full h-1.5">
+                  <div
+                    className="bg-rose-400 h-1.5 rounded-full"
+                    style={{ width: `${(count / total) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-semibold text-gray-700 w-4 text-right">{count}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Por red social */}
+      <div className="bg-white rounded-xl shadow p-5">
+        <div className="flex items-center gap-2 text-gray-500 text-xs font-semibold uppercase tracking-wide mb-3">
+          <Instagram className="w-4 h-4" />
+          Por red social
+        </div>
+        <div className="space-y-2">
+          {byNetwork.map(([network, count]) => (
+            <div key={network} className="flex items-center justify-between gap-2">
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${networkColors[network]}`}>
+                {networkNames[network]}
+              </span>
+              <span className="text-xs font-semibold text-gray-700">{count}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  );
+}
 
 export function PublicPage() {
   const [pieces, setPieces] = useState<ContentPiece[]>([]);
@@ -37,6 +145,8 @@ export function PublicPage() {
           </h1>
           <p className="text-gray-600">Avon Microcentro</p>
         </div>
+
+        {!loading && <StatsPanel pieces={pieces} />}
 
         <div className="flex justify-center mb-6">
           <div className="flex gap-2 bg-white rounded-lg p-1 shadow-md">
