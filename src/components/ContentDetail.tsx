@@ -1,4 +1,4 @@
-import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2 } from 'lucide-react';
+import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2, Tag } from 'lucide-react';
 import { ContentPiece } from '../lib/supabase';
 
 interface ContentDetailProps {
@@ -50,7 +50,7 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <div className={`${config.bg} p-2 rounded-lg`}>
               <Icon className={`w-6 h-6 ${config.color}`} />
             </div>
@@ -65,10 +65,7 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
               </span>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors ml-2">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -76,11 +73,7 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
         <div className="p-6 space-y-6">
           {piece.image_url && (
             <div className="rounded-xl overflow-hidden shadow-lg">
-              <img
-                src={piece.image_url}
-                alt="Content"
-                className="w-full h-auto"
-              />
+              <img src={piece.image_url} alt="Content" className="w-full h-auto" />
             </div>
           )}
 
@@ -89,39 +82,39 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
               <Calendar className="w-5 h-5 text-rose-600" />
               <div>
                 <p className="text-xs text-gray-600 font-medium">Fecha</p>
-                <p className="text-sm font-semibold text-gray-800 capitalize">
-                  {formatDate(piece.date)}
-                </p>
+                <p className="text-sm font-semibold text-gray-800 capitalize">{formatDate(piece.date)}</p>
               </div>
             </div>
-
             <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
               <Clock className="w-5 h-5 text-rose-600" />
               <div>
                 <p className="text-xs text-gray-600 font-medium">Hora</p>
-                <p className="text-sm font-semibold text-gray-800">
-                  {piece.time.slice(0, 5)}
-                </p>
+                <p className="text-sm font-semibold text-gray-800">{piece.time.slice(0, 5)}</p>
               </div>
             </div>
           </div>
 
+          {piece.reference && (
+            <div className="flex items-start gap-3 bg-rose-50 p-4 rounded-lg border border-rose-200">
+              <Tag className="w-5 h-5 text-rose-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-xs text-rose-600 font-medium mb-1">Referencia de campaña</p>
+                <p className="text-sm font-semibold text-rose-800">{piece.reference}</p>
+              </div>
+            </div>
+          )}
+
           {piece.description && (
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-xs text-gray-600 font-medium mb-2">Descripción</p>
-              <p className="text-sm text-gray-800 whitespace-pre-wrap">
-                {piece.description}
-              </p>
+              <p className="text-sm text-gray-800 whitespace-pre-wrap">{piece.description}</p>
             </div>
           )}
 
           {isAdmin && onEdit && onDelete && (
             <div className="flex gap-3 pt-4 border-t border-gray-200">
               <button
-                onClick={() => {
-                  onEdit(piece);
-                  onClose();
-                }}
+                onClick={() => { onEdit(piece); onClose(); }}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors"
               >
                 <Edit className="w-5 h-5" />
