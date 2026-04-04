@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Upload, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, Upload, Loader2, CheckCircle2, TrendingUp } from 'lucide-react';
 import { supabase, ContentPiece } from '../lib/supabase';
 
 interface ContentFormProps {
@@ -16,6 +16,8 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
   const [description, setDescription] = useState<string>(piece?.description || '');
   const [reference, setReference] = useState<string>(piece?.reference || '');
   const [published, setPublished] = useState<boolean>(piece?.published || false);
+  const [performance, setPerformance] = useState<string>(piece?.performance || '');
+  const [goodPerformance, setGoodPerformance] = useState<boolean>(piece?.good_performance || false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(piece?.image_url || null);
   const [loading, setLoading] = useState(false);
@@ -66,6 +68,8 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
         reference: reference || null,
         image_url: imageUrl,
         published,
+        performance: performance || null,
+        good_performance: goodPerformance,
       };
 
       if (piece) {
@@ -206,22 +210,58 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
             </div>
           </div>
 
+          {/* Toggle Diseñada */}
           <div
             onClick={() => setPublished(!published)}
             className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all select-none ${
               published ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
             }`}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${published ? 'bg-green-500' : 'bg-gray-300'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${published ? 'bg-blue-500' : 'bg-gray-300'}`}>
               <CheckCircle2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className={`font-semibold text-sm ${published ? 'text-green-700' : 'text-gray-600'}`}>
+              <p className={`font-semibold text-sm ${published ? 'text-blue-700' : 'text-gray-600'}`}>
                 {published ? '✓ Diseñada' : 'Marcar como diseñada'}
               </p>
               <p className="text-xs text-gray-500">
                 {published ? 'Esta pieza ya fue diseñada' : 'Todavía no fue diseñada'}
               </p>
+            </div>
+          </div>
+
+          {/* Sección Performance */}
+          <div className="border border-gray-200 rounded-xl p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-rose-500" />
+              Performance
+            </h3>
+
+            <textarea
+              value={performance}
+              onChange={(e) => setPerformance(e.target.value)}
+              rows={3}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 resize-none text-sm"
+              placeholder="Ej: 1.200 impresiones, 45 likes, buen engagement en la primera hora..."
+            />
+
+            <div
+              onClick={() => setGoodPerformance(!goodPerformance)}
+              className={`flex items-center gap-4 p-3 rounded-xl border-2 cursor-pointer transition-all select-none ${
+                goodPerformance ? 'border-amber-400 bg-amber-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+              }`}
+            >
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${goodPerformance ? 'bg-amber-400' : 'bg-gray-300'}`}>
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className={`font-semibold text-sm ${goodPerformance ? 'text-amber-700' : 'text-gray-600'}`}>
+                  {goodPerformance ? '⭐ Buena performance' : 'Marcar como buena performance'}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {goodPerformance ? 'Esta pieza tuvo buen resultado' : 'Sin marcar todavía'}
+                </p>
+              </div>
             </div>
           </div>
 
