@@ -14,6 +14,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
   const [date, setDate] = useState<string>(piece?.date || '');
   const [time, setTime] = useState<string>(piece?.time || '');
   const [description, setDescription] = useState<string>(piece?.description || '');
+  const [reference, setReference] = useState<string>(piece?.reference || '');
   const [published, setPublished] = useState<boolean>(piece?.published || false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(piece?.image_url || null);
@@ -36,18 +37,14 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
   const uploadImage = async (file: File): Promise<string> => {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `${fileName}`;
 
     const { error: uploadError } = await supabase.storage
       .from('media')
-      .upload(filePath, file);
+      .upload(fileName, file);
 
     if (uploadError) throw uploadError;
 
-    const { data } = supabase.storage
-      .from('media')
-      .getPublicUrl(filePath);
-
+    const { data } = supabase.storage.from('media').getPublicUrl(fileName);
     return data.publicUrl;
   };
 
@@ -58,10 +55,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
 
     try {
       let imageUrl = piece?.image_url || null;
-
-      if (imageFile) {
-        imageUrl = await uploadImage(imageFile);
-      }
+      if (imageFile) imageUrl = await uploadImage(imageFile);
 
       const contentData = {
         network,
@@ -69,6 +63,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
         date,
         time,
         description,
+        reference: reference || null,
         image_url: imageUrl,
         published,
       };
@@ -78,13 +73,11 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
           .from('content_pieces')
           .update(contentData)
           .eq('id', piece.id);
-
         if (updateError) throw updateError;
       } else {
         const { error: insertError } = await supabase
           .from('content_pieces')
           .insert([contentData]);
-
         if (insertError) throw insertError;
       }
 
@@ -104,20 +97,16 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
           <h2 className="text-2xl font-bold text-gray-800">
             {piece ? 'Editar Contenido' : 'Nuevo Contenido'}
           </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors">
             <X className="w-6 h-6" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Red Social
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Red Social</label>
               <select
                 value={network}
                 onChange={(e) => setNetwork(e.target.value)}
@@ -129,11 +118,8 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
                 <option value="tiktok">TikTok</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Formato
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Formato</label>
               <select
                 value={format}
                 onChange={(e) => setFormat(e.target.value)}
@@ -151,9 +137,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Fecha
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Fecha</label>
               <input
                 type="date"
                 value={date}
@@ -162,11 +146,8 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
                 required
               />
             </div>
-
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Hora
-              </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Hora</label>
               <input
                 type="time"
                 value={time}
@@ -175,6 +156,19 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Referencia de campaña
+            </label>
+            <input
+              type="text"
+              value={reference}
+              onChange={(e) => setReference(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
+              placeholder="Ej: Campaña Día de la Madre, Lanzamiento Perfume X..."
+            />
           </div>
 
           <div>
@@ -191,77 +185,48 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Imagen
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Imagen</label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-rose-500 transition-colors">
               {imagePreview ? (
                 <div className="space-y-4">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
+                  <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
                   <label className="block">
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                    <span className="text-sm text-rose-600 hover:text-rose-700 cursor-pointer font-medium">
-                      Cambiar imagen
-                    </span>
+                    <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} className="hidden" />
+                    <span className="text-sm text-rose-600 hover:text-rose-700 cursor-pointer font-medium">Cambiar imagen</span>
                   </label>
                 </div>
               ) : (
                 <label className="flex flex-col items-center cursor-pointer">
                   <Upload className="w-12 h-12 text-gray-400 mb-2" />
-                  <span className="text-sm text-gray-600 mb-1">
-                    Haz clic para subir una imagen
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    JPG, PNG o WEBP
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
+                  <span className="text-sm text-gray-600 mb-1">Haz clic para subir una imagen</span>
+                  <span className="text-xs text-gray-500">JPG, PNG o WEBP</span>
+                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={handleImageChange} className="hidden" />
                 </label>
               )}
             </div>
           </div>
 
-          {/* Toggle Armado */}
           <div
             onClick={() => setPublished(!published)}
             className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all select-none ${
-              published
-                ? 'border-green-400 bg-green-50'
-                : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+              published ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
             }`}
           >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-              published ? 'bg-green-500' : 'bg-gray-300'
-            }`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${published ? 'bg-green-500' : 'bg-gray-300'}`}>
               <CheckCircle2 className="w-6 h-6 text-white" />
             </div>
             <div>
               <p className={`font-semibold text-sm ${published ? 'text-green-700' : 'text-gray-600'}`}>
-                {published ? '✓ Armado' : 'Marcar como armado'}
+                {published ? '✓ Publicado' : 'Marcar como publicado'}
               </p>
               <p className="text-xs text-gray-500">
-                {published ? 'Esta pieza ya fue armada' : 'Todavía no fue armada'}
+                {published ? 'Esta pieza ya fue publicada' : 'Todavía no fue publicada'}
               </p>
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              {error}
-            </div>
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
           )}
 
           <div className="flex gap-3 pt-4">
@@ -278,13 +243,8 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
               className="flex-1 px-6 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Guardando...
-                </>
-              ) : (
-                'Guardar'
-              )}
+                <><Loader2 className="w-5 h-5 animate-spin" />Guardando...</>
+              ) : 'Guardar'}
             </button>
           </div>
         </form>
