@@ -1,4 +1,4 @@
-import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2, Tag } from 'lucide-react';
+import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2, Tag, TrendingUp } from 'lucide-react';
 import { ContentPiece } from '../lib/supabase';
 
 interface ContentDetailProps {
@@ -64,6 +64,12 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
                 Diseñado
               </span>
             )}
+            {piece.good_performance && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full border border-amber-300">
+                <TrendingUp className="w-3 h-3" />
+                Buena performance
+              </span>
+            )}
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700 transition-colors ml-2">
             <X className="w-6 h-6" />
@@ -108,6 +114,18 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-xs text-gray-600 font-medium mb-2">Descripción</p>
               <p className="text-sm text-gray-800 whitespace-pre-wrap">{piece.description}</p>
+            </div>
+          )}
+
+          {piece.performance && (
+            <div className={`p-4 rounded-lg border ${piece.good_performance ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}>
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className={`w-4 h-4 ${piece.good_performance ? 'text-amber-500' : 'text-gray-500'}`} />
+                <p className={`text-xs font-medium ${piece.good_performance ? 'text-amber-600' : 'text-gray-600'}`}>
+                  Performance {piece.good_performance ? '⭐' : ''}
+                </p>
+              </div>
+              <p className="text-sm text-gray-800 whitespace-pre-wrap">{piece.performance}</p>
             </div>
           )}
 
