@@ -10,7 +10,7 @@ interface ContentDetailProps {
 }
 
 const networkConfig = {
-  instagram: { name: 'Instagram', color: 'text-pink-600', bg: 'bg-pink-100', icon: Instagram },
+  instagram: { name: 'Instagram', color: 'text-black-600', bg: 'bg-pink-100', icon: Instagram },
   whatsapp: { name: 'WhatsApp', color: 'text-green-600', bg: 'bg-green-100', icon: MessageCircle },
   tiktok: {
     name: 'TikTok',
