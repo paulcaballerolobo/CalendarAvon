@@ -5,11 +5,11 @@ import { ListView } from '../components/ListView';
 import { supabase, ContentPiece } from '../lib/supabase';
 
 const formatNames: Record<string, string> = {
-  reel: 'Reel',
-  carrusel: 'Carrusel',
-  historia: 'Historia',
-  post: 'Post estático',
-  newsletter: 'Newsletter',
+  reel: 'Reels',
+  carrusel: 'Carruseles',
+  historia: 'Historias',
+  post: 'Posteos en Feed',
+  newsletter: 'Newsletters',
 };
 
 const networkNames: Record<string, string> = {
