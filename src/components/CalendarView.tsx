@@ -77,8 +77,8 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
                 onClick={() => setSelectedPiece(piece)}
                 className={`w-full text-left px-2 py-1 rounded text-xs font-medium border transition-shadow hover:shadow-md ${
                   piece.published
-                    ? 'bg-green-100 text-green-800 border-green-400'
-                    : networkColors[piece.network]
+                  ? 'bg-blue-100 text-blue-800 border-blue-400'
+                  : networkColors[piece.network]
                 }`}
               >
                 <div className="flex items-center gap-1">
