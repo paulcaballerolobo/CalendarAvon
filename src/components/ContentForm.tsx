@@ -209,7 +209,7 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
           <div
             onClick={() => setPublished(!published)}
             className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all select-none ${
-              published ? 'border-green-400 bg-green-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+              published ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
             }`}
           >
             <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${published ? 'bg-green-500' : 'bg-gray-300'}`}>
@@ -217,10 +217,10 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
             </div>
             <div>
               <p className={`font-semibold text-sm ${published ? 'text-green-700' : 'text-gray-600'}`}>
-                {published ? '✓ Publicado' : 'Marcar como publicado'}
+                {published ? '✓ Diseñada' : 'Marcar como diseñada'}
               </p>
               <p className="text-xs text-gray-500">
-                {published ? 'Esta pieza ya fue publicada' : 'Todavía no fue publicada'}
+                {published ? 'Esta pieza ya fue diseñada' : 'Todavía no fue diseñada'}
               </p>
             </div>
           </div>
