@@ -130,11 +130,11 @@ export function ContentForm({ piece, onClose, onSave }: ContentFormProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500"
                 required
               >
-                <option value="reel">Reels</option>
-                <option value="carrusel">Carruseles</option>
-                <option value="historia">Historias</option>
-                <option value="post">Posts-feed</option>
-                <option value="newsletter">Newsletters</option>
+                <option value="reel">Reel</option>
+                <option value="carrusel">Carrusel</option>
+                <option value="historia">Historia</option>
+                <option value="post">Post-feed</option>
+                <option value="newsletter">Newsletter</option>
               </select>
             </div>
           </div>
