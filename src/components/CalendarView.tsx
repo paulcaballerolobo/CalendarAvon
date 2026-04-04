@@ -13,7 +13,7 @@ interface CalendarViewProps {
 }
 
 const networkColors = {
-  instagram: 'bg-pink-100 text-pink-700 border-pink-300',
+  instagram: 'bg-pink-100 text-black-700 border-pink-300',
   whatsapp: 'bg-green-100 text-green-700 border-green-300',
   tiktok: 'bg-gray-900 text-white border-gray-700',
 };
