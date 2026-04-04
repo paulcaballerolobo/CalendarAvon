@@ -85,7 +85,7 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
                   <Icon className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate capitalize">{piece.format}</span>
                   {piece.published && (
-                    <CheckCircle2 className="w-3 h-3 ml-auto flex-shrink-0 text-green-600" />
+                    <CheckCircle2 className="w-3 h-3 ml-auto flex-shrink-0 text-blue-600" />
                   )}
                 </div>
                 {piece.reference && (
