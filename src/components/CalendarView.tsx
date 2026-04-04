@@ -88,7 +88,10 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
                     <CheckCircle2 className="w-3 h-3 ml-auto flex-shrink-0 text-green-600" />
                   )}
                 </div>
-                <div className="text-xs opacity-75">{piece.time.slice(0, 5)}</div>
+                {piece.reference && (
+                  <div className="text-xs truncate opacity-75 mt-0.5">{piece.reference}</div>
+                )}
+                <div className="text-xs opacity-60">{piece.time.slice(0, 5)}</div>
               </button>
             );
           })}
@@ -101,34 +104,22 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
     <>
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 flex items-center justify-between text-white">
-          <button
-            onClick={previousMonth}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
+          <button onClick={previousMonth} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <h2 className="text-2xl font-bold">
-            {monthNames[month]} {year}
-          </h2>
-          <button
-            onClick={nextMonth}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
+          <h2 className="text-2xl font-bold">{monthNames[month]} {year}</h2>
+          <button onClick={nextMonth} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>
 
         <div className="grid grid-cols-7 bg-gray-100">
           {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map((day) => (
-            <div key={day} className="px-2 py-3 text-center text-sm font-semibold text-gray-700">
-              {day}
-            </div>
+            <div key={day} className="px-2 py-3 text-center text-sm font-semibold text-gray-700">{day}</div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7">
-          {days}
-        </div>
+        <div className="grid grid-cols-7">{days}</div>
       </div>
 
       {selectedPiece && (
