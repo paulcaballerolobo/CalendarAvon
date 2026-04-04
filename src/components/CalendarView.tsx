@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Instagram, MessageCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Instagram, MessageCircle, CheckCircle2, Star } from 'lucide-react';
 import { ContentPiece } from '../lib/supabase';
 import { ContentDetail } from './ContentDetail';
 
@@ -8,6 +8,8 @@ interface CalendarViewProps {
   isAdmin?: boolean;
   onEdit?: (piece: ContentPiece) => void;
   onDelete?: (id: string) => void;
+  currentDate?: Date;
+  onMonthChange?: (date: Date) => void;
 }
 
 const networkColors = {
@@ -26,9 +28,9 @@ const networkIcons = {
   ),
 };
 
-export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedPiece, setSelectedPiece] = useState<ContentPiece | null>(null);
+export function CalendarView({ pieces, isAdmin, onEdit, onDelete, currentDate: externalDate, onMonthChange }: CalendarViewProps) {
+  const [internalDate, setInternalDate] = useState(new Date());
+  const currentDate = externalDate ?? internalDate;
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -37,9 +39,18 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
   const lastDayOfMonth = new Date(year, month + 1, 0);
   const daysInMonth = lastDayOfMonth.getDate();
   const startingDayOfWeek = firstDayOfMonth.getDay();
+  const [selectedPiece, setSelectedPiece] = useState<ContentPiece | null>(null);
 
-  const previousMonth = () => setCurrentDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
+  const changeMonth = (newDate: Date) => {
+    if (onMonthChange) {
+      onMonthChange(newDate);
+    } else {
+      setInternalDate(newDate);
+    }
+  };
+
+  const previousMonth = () => changeMonth(new Date(year, month - 1, 1));
+  const nextMonth = () => changeMonth(new Date(year, month + 1, 1));
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -77,16 +88,21 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete }: CalendarView
                 onClick={() => setSelectedPiece(piece)}
                 className={`w-full text-left px-2 py-1 rounded text-xs font-medium border transition-shadow hover:shadow-md ${
                   piece.published
-                  ? 'bg-blue-100 text-blue-800 border-blue-400'
-                  : networkColors[piece.network]
+                    ? 'bg-blue-100 text-blue-800 border-blue-400'
+                    : networkColors[piece.network]
                 }`}
               >
                 <div className="flex items-center gap-1">
                   <Icon className="w-3 h-3 flex-shrink-0" />
                   <span className="truncate capitalize">{piece.format}</span>
-                  {piece.published && (
-                    <CheckCircle2 className="w-3 h-3 ml-auto flex-shrink-0 text-blue-600" />
-                  )}
+                  <span className="ml-auto flex items-center gap-0.5 flex-shrink-0">
+                    {piece.good_performance && (
+                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                    )}
+                    {piece.published && (
+                      <CheckCircle2 className="w-3 h-3 text-blue-600" />
+                    )}
+                  </span>
                 </div>
                 {piece.reference && (
                   <div className="text-xs truncate opacity-75 mt-0.5">{piece.reference}</div>
