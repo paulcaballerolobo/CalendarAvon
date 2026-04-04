@@ -19,5 +19,7 @@ export interface ContentPiece {
   reference: string | null;
   image_url: string | null;
   published: boolean;
+  performance: string | null;
+  good_performance: boolean;
   created_at: string;
 }
