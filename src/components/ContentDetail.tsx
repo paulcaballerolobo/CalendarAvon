@@ -59,7 +59,7 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
               <p className="text-sm text-gray-600 capitalize">{formatNames[piece.format]}</p>
             </div>
             {piece.published && (
-              <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-green-300">
+              <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-300">
                 <CheckCircle2 className="w-3 h-3" />
                 Diseñado
               </span>
