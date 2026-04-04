@@ -19,7 +19,7 @@ const networkNames: Record<string, string> = {
 };
 
 const networkColors: Record<string, string> = {
-  instagram: 'bg-pink-100 text-pink-700',
+  instagram: 'bg-pink-100 text-black-700',
   whatsapp: 'bg-green-100 text-green-700',
   tiktok: 'bg-gray-100 text-gray-800',
 };
