@@ -13,12 +13,17 @@ const networkConfig: Record<Network, { name: string; color: string; bg: string }
   instagram: { name: 'Instagram', color: 'text-red-600', bg: 'bg-red-100' },
   whatsapp: { name: 'WhatsApp', color: 'text-green-600', bg: 'bg-green-100' },
   tiktok: { name: 'TikTok', color: 'text-gray-900', bg: 'bg-gray-100' },
+  facebook: { name: 'Facebook', color: 'text-blue-600', bg: 'bg-blue-100' },
   envivo: { name: 'En Vivo', color: 'text-purple-600', bg: 'bg-purple-100' },
 };
 
 const NetworkIcon = ({ network, className }: { network: Network; className?: string }) => {
   if (network === 'instagram') return <Instagram className={className} />;
   if (network === 'whatsapp') return <MessageCircle className={className} />;
+  if (network === 'facebook') return (<svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/>
+  </svg>
+);
   if (network === 'envivo') return <Mic className={className} />;
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
