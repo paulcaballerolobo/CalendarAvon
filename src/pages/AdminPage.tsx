@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Calendar as CalendarIcon, List, LogOut } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, List, LogOut, Flag } from 'lucide-react';
 import { PasswordProtection } from '../components/PasswordProtection';
 import { ContentForm } from '../components/ContentForm';
+import { CampaignForm } from '../components/CampaignForm';
 import { CalendarView } from '../components/CalendarView';
 import { ListView } from '../components/ListView';
 import { supabase, ContentPiece } from '../lib/supabase';
@@ -10,8 +11,10 @@ export function AdminPage() {
   const [pieces, setPieces] = useState<ContentPiece[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [showCampaigns, setShowCampaigns] = useState(false);
   const [editingPiece, setEditingPiece] = useState<ContentPiece | undefined>();
   const [view, setView] = useState<'calendar' | 'list'>('calendar');
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const loadPieces = async () => {
     setLoading(true);
@@ -28,19 +31,11 @@ export function AdminPage() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    loadPieces();
-  }, []);
+  useEffect(() => { loadPieces(); }, []);
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from('content_pieces')
-      .delete()
-      .eq('id', id);
-
-    if (!error) {
-      loadPieces();
-    }
+    const { error } = await supabase.from('content_pieces').delete().eq('id', id);
+    if (!error) loadPieces();
   };
 
   const handleEdit = (piece: ContentPiece) => {
@@ -64,9 +59,7 @@ export function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                Calendario de Contenido
-              </h1>
+              <h1 className="text-4xl font-bold text-gray-800 mb-2">Calendario de Contenido</h1>
               <p className="text-gray-600">Avon Microcentro - Panel de Administración</p>
             </div>
             <button
@@ -78,25 +71,28 @@ export function AdminPage() {
             </button>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <button
-              onClick={() => {
-                setEditingPiece(undefined);
-                setShowForm(true);
-              }}
-              className="flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors shadow-lg hover:shadow-xl"
+              onClick={() => { setEditingPiece(undefined); setShowForm(true); }}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors shadow-lg"
             >
               <Plus className="w-5 h-5" />
               Nuevo Contenido
+            </button>
+
+            <button
+              onClick={() => setShowCampaigns(true)}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 border border-gray-300 rounded-lg font-semibold hover:bg-gray-50 transition-colors shadow"
+            >
+              <Flag className="w-5 h-5 text-rose-500" />
+              Campañas
             </button>
 
             <div className="flex gap-2 bg-white rounded-lg p-1 shadow-md">
               <button
                 onClick={() => setView('calendar')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
-                  view === 'calendar'
-                    ? 'bg-rose-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                  view === 'calendar' ? 'bg-rose-600 text-white' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <CalendarIcon className="w-5 h-5" />
@@ -105,9 +101,7 @@ export function AdminPage() {
               <button
                 onClick={() => setView('list')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md font-medium transition-colors ${
-                  view === 'list'
-                    ? 'bg-rose-600 text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                  view === 'list' ? 'bg-rose-600 text-white' : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
                 <List className="w-5 h-5" />
@@ -127,23 +121,20 @@ export function AdminPage() {
               isAdmin={true}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              currentDate={currentDate}
+              onMonthChange={setCurrentDate}
             />
           ) : (
-            <ListView
-              pieces={pieces}
-              isAdmin={true}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+            <ListView pieces={pieces} isAdmin={true} onEdit={handleEdit} onDelete={handleDelete} />
           )}
         </div>
 
         {showForm && (
-          <ContentForm
-            piece={editingPiece}
-            onClose={handleCloseForm}
-            onSave={loadPieces}
-          />
+          <ContentForm piece={editingPiece} onClose={handleCloseForm} onSave={loadPieces} />
+        )}
+
+        {showCampaigns && (
+          <CampaignForm onClose={() => setShowCampaigns(false)} />
         )}
       </div>
     </PasswordProtection>
