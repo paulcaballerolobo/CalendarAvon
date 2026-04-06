@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Instagram, MessageCircle, CheckCircle2, Star } from 'lucide-react';
-import { ContentPiece } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, Instagram, MessageCircle, CheckCircle2, Star, Mic } from 'lucide-react';
+import { ContentPiece, Campaign, Network, supabase } from '../lib/supabase';
 import { ContentDetail } from './ContentDetail';
 
 interface CalendarViewProps {
@@ -12,105 +12,149 @@ interface CalendarViewProps {
   onMonthChange?: (date: Date) => void;
 }
 
-const networkColors = {
-  instagram: 'bg-pink-100 text-black-700 border-pink-300',
-  whatsapp: 'bg-green-100 text-green-700 border-green-300',
-  tiktok: 'bg-gray-900 text-white border-gray-700',
-};
-
-const networkIcons = {
-  instagram: Instagram,
-  whatsapp: MessageCircle,
-  tiktok: () => (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+// Íconos por red
+const NetworkIcon = ({ network, className }: { network: Network; className?: string }) => {
+  if (network === 'instagram') return <Instagram className={className} />;
+  if (network === 'whatsapp') return <MessageCircle className={className} />;
+  if (network === 'envivo') return <Mic className={className} />;
+  // TikTok
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
       <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
     </svg>
-  ),
+  );
 };
+
+// Color individual por red (para íconos)
+const networkIconColor: Record<Network, string> = {
+  instagram: 'text-red-500',
+  whatsapp: 'text-green-600',
+  tiktok: 'text-gray-800',
+  envivo: 'text-purple-600',
+};
+
+// Color de tarjeta según estado
+function getPieceCardClass(piece: ContentPiece): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Publicada: la fecha más tardía ya pasó
+  const allDates = piece.dates?.length ? piece.dates : [piece.date];
+  const latestDate = new Date(Math.max(...allDates.map(d => new Date(d).getTime())));
+  const isPast = latestDate < today;
+
+  if (isPast) return 'bg-blue-100 text-blue-800 border-blue-300';
+  if (piece.published) return 'bg-green-100 text-green-800 border-green-300';
+  return 'bg-gray-100 text-gray-700 border-gray-300';
+}
 
 export function CalendarView({ pieces, isAdmin, onEdit, onDelete, currentDate: externalDate, onMonthChange }: CalendarViewProps) {
   const [internalDate, setInternalDate] = useState(new Date());
-  const currentDate = externalDate ?? internalDate;
+  const [selectedPiece, setSelectedPiece] = useState<ContentPiece | null>(null);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
 
+  const currentDate = externalDate ?? internalDate;
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startingDayOfWeek = new Date(year, month, 1).getDay();
 
-  const firstDayOfMonth = new Date(year, month, 1);
-  const lastDayOfMonth = new Date(year, month + 1, 0);
-  const daysInMonth = lastDayOfMonth.getDate();
-  const startingDayOfWeek = firstDayOfMonth.getDay();
-  const [selectedPiece, setSelectedPiece] = useState<ContentPiece | null>(null);
+  useEffect(() => {
+    supabase.from('campaigns').select('*').then(({ data }) => setCampaigns(data || []));
+  }, []);
 
   const changeMonth = (newDate: Date) => {
-    if (onMonthChange) {
-      onMonthChange(newDate);
-    } else {
-      setInternalDate(newDate);
-    }
+    if (onMonthChange) onMonthChange(newDate);
+    else setInternalDate(newDate);
   };
-
-  const previousMonth = () => changeMonth(new Date(year, month - 1, 1));
-  const nextMonth = () => changeMonth(new Date(year, month + 1, 1));
 
   const monthNames = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
 
+  const getDateStr = (day: number) =>
+    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
   const getPiecesForDate = (day: number) => {
-    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return pieces.filter(piece => piece.date === dateStr);
+    const dateStr = getDateStr(day);
+    return pieces.filter(piece => {
+      const allDates = piece.dates?.length ? piece.dates : [piece.date];
+      return allDates.includes(dateStr);
+    });
+  };
+
+  const getCampaignsForDate = (day: number): Campaign[] => {
+    const dateStr = getDateStr(day);
+    return campaigns.filter(c => c.start_date <= dateStr && c.end_date >= dateStr);
   };
 
   const days = [];
   for (let i = 0; i < startingDayOfWeek; i++) {
-    days.push(<div key={`empty-${i}`} className="min-h-24 bg-gray-50"></div>);
+    days.push(<div key={`empty-${i}`} className="min-h-28 bg-gray-50 border border-gray-100"></div>);
   }
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dayPieces = getPiecesForDate(day);
+    const dayCampaigns = getCampaignsForDate(day);
     const isToday = new Date().toDateString() === new Date(year, month, day).toDateString();
 
     days.push(
       <div
         key={day}
-        className={`min-h-24 border border-gray-200 p-2 ${isToday ? 'bg-rose-50' : 'bg-white'}`}
+        className={`min-h-28 border border-gray-200 flex flex-col ${isToday ? 'bg-rose-50' : 'bg-white'}`}
       >
-        <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-rose-600' : 'text-gray-700'}`}>
-          {day}
-        </div>
-        <div className="space-y-1">
-          {dayPieces.map((piece) => {
-            const Icon = networkIcons[piece.network];
-            return (
-              <button
-                key={piece.id}
-                onClick={() => setSelectedPiece(piece)}
-                className={`w-full text-left px-2 py-1 rounded text-xs font-medium border transition-shadow hover:shadow-md ${
-                  piece.published
-                    ? 'bg-blue-100 text-blue-800 border-blue-400'
-                    : networkColors[piece.network]
-                }`}
+        {/* Franjas de campaña */}
+        {dayCampaigns.length > 0 && (
+          <div className="flex flex-col gap-px">
+            {dayCampaigns.map(c => (
+              <div
+                key={c.id}
+                className="px-1.5 py-0.5 text-white text-xs font-semibold truncate"
+                style={{ backgroundColor: c.color }}
+                title={c.name}
               >
-                <div className="flex items-center gap-1">
-                  <Icon className="w-3 h-3 flex-shrink-0" />
-                  <span className="truncate capitalize">{piece.format}</span>
-                  <span className="ml-auto flex items-center gap-0.5 flex-shrink-0">
-                    {piece.good_performance && (
-                      <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                    )}
-                    {piece.published && (
-                      <CheckCircle2 className="w-3 h-3 text-blue-600" />
-                    )}
-                  </span>
-                </div>
-                {piece.reference && (
-                  <div className="text-xs truncate opacity-75 mt-0.5">{piece.reference}</div>
-                )}
-                <div className="text-xs opacity-60">{piece.time.slice(0, 5)}</div>
-              </button>
-            );
-          })}
+                {c.name}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="p-1.5 flex-1">
+          <div className={`text-sm font-semibold mb-1 ${isToday ? 'text-rose-600' : 'text-gray-700'}`}>
+            {day}
+          </div>
+          <div className="space-y-1">
+            {dayPieces.map((piece) => {
+              const nets: Network[] = piece.networks?.length ? piece.networks : [piece.network];
+              const cardClass = getPieceCardClass(piece);
+              return (
+                <button
+                  key={piece.id}
+                  onClick={() => setSelectedPiece(piece)}
+                  className={`w-full text-left px-1.5 py-1 rounded text-xs font-medium border transition-shadow hover:shadow-md ${cardClass}`}
+                >
+                  <div className="flex items-center gap-1 flex-wrap">
+                    {/* Íconos de redes */}
+                    <span className="flex items-center gap-0.5">
+                      {nets.map(n => (
+                        <NetworkIcon key={n} network={n} className={`w-3 h-3 ${networkIconColor[n]}`} />
+                      ))}
+                    </span>
+                    <span className="truncate capitalize flex-1">{piece.format}</span>
+                    <span className="flex items-center gap-0.5 flex-shrink-0">
+                      {piece.good_performance && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
+                      {piece.published && <CheckCircle2 className="w-3 h-3 text-green-600" />}
+                    </span>
+                  </div>
+                  {piece.reference && (
+                    <div className="text-xs truncate opacity-75 mt-0.5">{piece.reference}</div>
+                  )}
+                  <div className="text-xs opacity-60">{piece.time?.slice(0, 5)}</div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -120,11 +164,11 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete, currentDate: e
     <>
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 flex items-center justify-between text-white">
-          <button onClick={previousMonth} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+          <button onClick={() => changeMonth(new Date(year, month - 1, 1))} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </button>
           <h2 className="text-2xl font-bold">{monthNames[month]} {year}</h2>
-          <button onClick={nextMonth} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
+          <button onClick={() => changeMonth(new Date(year, month + 1, 1))} className="p-2 hover:bg-white/20 rounded-lg transition-colors">
             <ChevronRight className="w-6 h-6" />
           </button>
         </div>
@@ -136,6 +180,14 @@ export function CalendarView({ pieces, isAdmin, onEdit, onDelete, currentDate: e
         </div>
 
         <div className="grid grid-cols-7">{days}</div>
+
+        {/* Leyenda */}
+        <div className="px-4 py-3 border-t border-gray-100 flex flex-wrap gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-gray-300 inline-block"></span>Cargada</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-green-300 inline-block"></span>Diseñada</span>
+          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-blue-300 inline-block"></span>Publicada</span>
+          <span className="flex items-center gap-1.5"><Star className="w-3 h-3 text-amber-400 fill-amber-400" />Buena performance</span>
+        </div>
       </div>
 
       {selectedPiece && (
