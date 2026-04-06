@@ -12,6 +12,7 @@ const NETWORKS: { value: Network; label: string }[] = [
   { value: 'instagram', label: 'Instagram' },
   { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'tiktok', label: 'TikTok' },
+   { value: 'facebook', label: 'Facebook' },
   { value: 'envivo', label: 'En Vivo' },
 ];
 
