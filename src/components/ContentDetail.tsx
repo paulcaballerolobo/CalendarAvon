@@ -1,5 +1,5 @@
-import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2, Tag, TrendingUp } from 'lucide-react';
-import { ContentPiece } from '../lib/supabase';
+import { X, CreditCard as Edit, Trash2, Instagram, MessageCircle, Calendar, Clock, CheckCircle2, Tag, TrendingUp, Mic } from 'lucide-react';
+import { ContentPiece, Network } from '../lib/supabase';
 
 interface ContentDetailProps {
   piece: ContentPiece;
@@ -9,65 +9,68 @@ interface ContentDetailProps {
   onDelete?: (id: string) => void;
 }
 
-const networkConfig = {
-  instagram: { name: 'Instagram', color: 'text-black-600', bg: 'bg-pink-100', icon: Instagram },
-  whatsapp: { name: 'WhatsApp', color: 'text-green-600', bg: 'bg-green-100', icon: MessageCircle },
-  tiktok: {
-    name: 'TikTok',
-    color: 'text-gray-900',
-    bg: 'bg-gray-100',
-    icon: () => (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
-      </svg>
-    )
-  },
+const networkConfig: Record<Network, { name: string; color: string; bg: string }> = {
+  instagram: { name: 'Instagram', color: 'text-red-600', bg: 'bg-red-100' },
+  whatsapp: { name: 'WhatsApp', color: 'text-green-600', bg: 'bg-green-100' },
+  tiktok: { name: 'TikTok', color: 'text-gray-900', bg: 'bg-gray-100' },
+  envivo: { name: 'En Vivo', color: 'text-purple-600', bg: 'bg-purple-100' },
+};
+
+const NetworkIcon = ({ network, className }: { network: Network; className?: string }) => {
+  if (network === 'instagram') return <Instagram className={className} />;
+  if (network === 'whatsapp') return <MessageCircle className={className} />;
+  if (network === 'envivo') return <Mic className={className} />;
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
+    </svg>
+  );
 };
 
 const formatNames: Record<string, string> = {
-  reel: 'Reel',
-  carrusel: 'Carrusel',
-  historia: 'Historia',
-  post: 'Post estático',
-  newsletter: 'Newsletter',
+  reel: 'Reel', carrusel: 'Carrusel', historia: 'Historia',
+  post: 'Post-feed', newsletter: 'Newsletter', envivo: 'En Vivo',
 };
 
 export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: ContentDetailProps) {
-  const config = networkConfig[piece.network];
-  const Icon = config.icon;
+  const nets: Network[] = piece.networks?.length ? piece.networks : [piece.network];
+  const allDates = piece.dates?.length ? piece.dates : [piece.date];
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr + 'T00:00:00');
-    return date.toLocaleDateString('es-ES', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
-  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 flex-wrap">
-            <div className={`${config.bg} p-2 rounded-lg`}>
-              <Icon className={`w-6 h-6 ${config.color}`} />
+            {/* Íconos de todas las redes */}
+            <div className="flex gap-1">
+              {nets.map(n => {
+                const cfg = networkConfig[n];
+                return (
+                  <div key={n} className={`${cfg.bg} p-2 rounded-lg`}>
+                    <NetworkIcon network={n} className={`w-5 h-5 ${cfg.color}`} />
+                  </div>
+                );
+              })}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-800">{config.name}</h2>
+              <h2 className="text-xl font-bold text-gray-800">
+                {nets.map(n => networkConfig[n].name).join(' + ')}
+              </h2>
               <p className="text-sm text-gray-600 capitalize">{formatNames[piece.format]}</p>
             </div>
             {piece.published && (
-              <span className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full border border-blue-300">
-                <CheckCircle2 className="w-3 h-3" />
-                Diseñado
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full border border-green-300">
+                <CheckCircle2 className="w-3 h-3" />Diseñado
               </span>
             )}
             {piece.good_performance && (
               <span className="flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full border border-amber-300">
-                <TrendingUp className="w-3 h-3" />
-                Buena performance
+                <TrendingUp className="w-3 h-3" />Buena performance
               </span>
             )}
           </div>
@@ -83,20 +86,26 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-              <Calendar className="w-5 h-5 text-rose-600" />
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Fecha</p>
-                <p className="text-sm font-semibold text-gray-800 capitalize">{formatDate(piece.date)}</p>
-              </div>
+          {/* Fechas */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-rose-600" />
+              <p className="text-xs text-gray-600 font-medium">
+                {allDates.length > 1 ? `Fechas (${allDates.length})` : 'Fecha'}
+              </p>
             </div>
-            <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
-              <Clock className="w-5 h-5 text-rose-600" />
-              <div>
-                <p className="text-xs text-gray-600 font-medium">Hora</p>
-                <p className="text-sm font-semibold text-gray-800">{piece.time.slice(0, 5)}</p>
-              </div>
+            <div className="space-y-1">
+              {allDates.sort().map(d => (
+                <p key={d} className="text-sm font-semibold text-gray-800 capitalize">{formatDate(d)}</p>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 bg-gray-50 p-4 rounded-lg">
+            <Clock className="w-5 h-5 text-rose-600" />
+            <div>
+              <p className="text-xs text-gray-600 font-medium">Hora</p>
+              <p className="text-sm font-semibold text-gray-800">{piece.time?.slice(0, 5)}</p>
             </div>
           </div>
 
@@ -104,7 +113,7 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
             <div className="flex items-start gap-3 bg-rose-50 p-4 rounded-lg border border-rose-200">
               <Tag className="w-5 h-5 text-rose-500 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-xs text-rose-600 font-medium mb-1">Referencia de campaña</p>
+                <p className="text-xs text-rose-600 font-medium mb-1">Referencia</p>
                 <p className="text-sm font-semibold text-rose-800">{piece.reference}</p>
               </div>
             </div>
@@ -135,20 +144,15 @@ export function ContentDetail({ piece, onClose, isAdmin, onEdit, onDelete }: Con
                 onClick={() => { onEdit(piece); onClose(); }}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-rose-600 text-white rounded-lg font-semibold hover:bg-rose-700 transition-colors"
               >
-                <Edit className="w-5 h-5" />
-                Editar
+                <Edit className="w-5 h-5" />Editar
               </button>
               <button
                 onClick={() => {
-                  if (confirm('¿Estás seguro de que quieres eliminar este contenido?')) {
-                    onDelete(piece.id);
-                    onClose();
-                  }
+                  if (confirm('¿Eliminar este contenido?')) { onDelete(piece.id); onClose(); }
                 }}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3 border border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors"
               >
-                <Trash2 className="w-5 h-5" />
-                Eliminar
+                <Trash2 className="w-5 h-5" />Eliminar
               </button>
             </div>
           )}
