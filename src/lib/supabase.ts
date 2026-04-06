@@ -9,7 +9,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type Network = 'instagram' | 'whatsapp' | 'tiktok' | 'envivo';
+export type Network = 'instagram' | 'whatsapp' | 'tiktok' |'facebook' | 'envivo';
 
 export interface Campaign {
   id: string;
