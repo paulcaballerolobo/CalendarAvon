@@ -27,6 +27,7 @@ const networkIconColor: Record<Network, string> = {
   instagram: 'text-red-500',
   whatsapp: 'text-green-600',
   tiktok: 'text-gray-800',
+  facebook: 'text-blue-600',
   envivo: 'text-purple-600',
 };
 
