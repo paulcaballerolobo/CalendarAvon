@@ -30,7 +30,6 @@ export function CampaignForm({ onClose }: CampaignFormProps) {
     const { data } = await supabase
       .from('campaigns')
       .select('*')
-      .eq('active', true)
       .order('start_date', { ascending: true });
     setCampaigns(data || []);
   };
@@ -59,8 +58,9 @@ export function CampaignForm({ onClose }: CampaignFormProps) {
     setLoading(false);
   };
 
-  const handleDeactivate = async (id: string) => {
-    await supabase.from('campaigns').update({ active: false }).eq('id', id);
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Borrar esta campaña? Las piezas asociadas quedan sin campaña asignada.')) return;
+    await supabase.from('campaigns').delete().eq('id', id);
     loadCampaigns();
   };
 
@@ -137,9 +137,9 @@ export function CampaignForm({ onClose }: CampaignFormProps) {
             </button>
           </form>
 
-          {/* Lista de campañas activas */}
+          {/* Lista de campañas */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Campañas activas</h3>
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Campañas cargadas</h3>
             {campaigns.length === 0 ? (
               <p className="text-xs text-gray-400">No hay campañas cargadas</p>
             ) : (
@@ -152,9 +152,9 @@ export function CampaignForm({ onClose }: CampaignFormProps) {
                       <p className="text-xs text-gray-500">{c.start_date} → {c.end_date}</p>
                     </div>
                     <button
-                      onClick={() => handleDeactivate(c.id)}
+                      onClick={() => handleDelete(c.id)}
                       className="p-1.5 text-gray-400 hover:text-red-500 transition-colors flex-shrink-0"
-                      title="Quitar del selector (no borra datos)"
+                      title="Borrar campaña"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
